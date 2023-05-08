@@ -8,7 +8,7 @@ def distance(patient1, patient2):
     See Alcaide et. al.
     '''
     similarity = 0
-
+    
     for ix1, dx1 in enumerate(patient1):
         if dx1 not in patient2:
             continue
@@ -17,6 +17,22 @@ def distance(patient1, patient2):
         similarity += math.log( 1 + 1/max(ix1+1, ix2+1) )
 
     return similarity
+
+def make_distance_matrix(patients):
+    '''
+    codes in order by SEQ_NUM
+    input: [ {HADM_ID: [code1, code2, ... ,coden]}, ... ]
+    output: [ [HADM_ID1, HADM_ID2, distance], ...]
+    '''
+
+    # matrix = [patient1, patient2, distance]
+    matrix = []
+    for patient1 in patients:
+        for patient2 in patients:
+            d = distance(patient1, patient2)
+            # TODO: add this to the matrix
+            matrix.append([patient1])
+
 
 if __name__ == "__main__":
     # Example from Alcaide et. al. Similarity should be 0.56.
