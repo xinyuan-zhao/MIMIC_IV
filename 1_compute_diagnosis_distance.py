@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import stad
 import igraph
-import usedist
+# import usedist
 import multiprocessing
 
 # Function: Diagnosis similarity
@@ -19,8 +19,8 @@ def r01(x):
 # Read ICD9 Codes
 # ----------------------------------------------------------------------------------
 # Set the working directory
-import os
-os.chdir("icd_list")
+# import os
+# os.chdir("icd_list")
 # ----------------------------------------------------------------------------------
 icd = pd.read_csv("icd_diagnostic_categories.csv", dtype={'ICD_DIAGNOSTIC_CATEGORY': str})
 icd = icd.rename(columns={'ICD_DIAGNOSTIC_CATEGORY': 'ICD', 'SEQUENCE_NUMBER': 'SEQ_NUM'})
@@ -46,9 +46,9 @@ def distance_icd(icd):
 
     # Compute distance matrix
     diag_s_values = diag_s.values
-    new_sim = usedist.dist_make(diag_s_values, new_similarity, "New similarity (custom)")
-    distance_matrix =  1 - r01(new_sim)
-
+    # new_sim = usedist.dist_make(diag_s_values, new_similarity, "New similarity (custom)")
+    # distance_matrix =  1 - r01(new_sim)
+    distance_matrix =  1
     # Save numpy array as npy file
     np.save("a_"+icd+"_distance.npy", distance_matrix)
 
