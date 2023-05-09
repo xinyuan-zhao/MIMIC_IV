@@ -26,12 +26,24 @@ def make_distance_matrix(patients):
     '''
 
     # matrix = [patient1, patient2, distance]
+    print(patients)
     matrix = []
     for patient1 in patients:
         for patient2 in patients:
-            d = distance(patient1, patient2)
+            print("sdsfasdfsafadsfsda")
+            print(list(patient1.keys())[0],list(patient2.keys())[0])
+            print(list(patient1.values())[0], list(patient2.values())[0])
+            d = distance(list(patient1.values())[0], list(patient2.values())[0])
             # TODO: add this to the matrix
-            matrix.append([patient1])
+            matrix.append([patient1,d])
+    print(matrix)
+
+
+def make_list_of_possible_edges():
+    # Sorting the list by distance
+
+    return None
+
 
 
 if __name__ == "__main__":
@@ -40,3 +52,8 @@ if __name__ == "__main__":
     patient2 = ['4329', '43491', '99702', '99591', '5990', '4019']
 
     print( round(distance(patient1, patient2), 2) )
+
+    patient3 = {16: ['99662', '99591', '5990', '4019']}
+
+    patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
+    make_distance_matrix([patient3,patient4])
