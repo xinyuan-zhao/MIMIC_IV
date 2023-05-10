@@ -1,4 +1,31 @@
 import math
+import csv
+
+def read_csv(file):
+    # need 'hadm_id', 'sequence_number'，'icd_diagnostic_category'
+    # ['subject_id', 'hadm_id', 'sequence_number', 'level', 'icd_diagnostic_category']
+
+    # ['2', '163353', '1', '2', 'V30']
+    # file = 'file.csv'
+    # Open the CSV file
+
+    with open(file, 'r') as file:
+
+        # Create a reader object
+        csv_reader = csv.reader(file)
+        # Counter variable to keep track of number of rows printed
+        row_count = 0
+
+        # Loop through each row in the CSV file
+        for row in csv_reader:
+            # Print each row
+            print(row)
+            # Increment the row count
+            row_count += 1
+
+            # Exit the loop once you've printed the first 10 rows
+            if row_count == 10:
+                break
 
 def distance(patient1, patient2):
     '''
@@ -30,12 +57,11 @@ def make_distance_matrix(patients):
     matrix = []
     for patient1 in patients:
         for patient2 in patients:
-            print("sdsfasdfsafadsfsda")
-            print(list(patient1.keys())[0],list(patient2.keys())[0])
-            print(list(patient1.values())[0], list(patient2.values())[0])
+            # print(list(patient1.keys())[0], list(patient2.keys())[0])
+            # print(list(patient1.values())[0], list(patient2.values())[0])
             d = distance(list(patient1.values())[0], list(patient2.values())[0])
             # TODO: add this to the matrix
-            matrix.append([patient1,d])
+            matrix.append([list(patient1.keys())[0], list(patient2.keys())[0], d])
     print(matrix)
 
 
@@ -56,4 +82,5 @@ if __name__ == "__main__":
     patient3 = {16: ['99662', '99591', '5990', '4019']}
 
     patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    make_distance_matrix([patient3,patient4])
+    make_distance_matrix([patient3, patient4])
+    read_csv('icd_diagnostic_categories.csv')
