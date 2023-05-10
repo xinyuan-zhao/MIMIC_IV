@@ -51,7 +51,6 @@ def make_distance_matrix(patients):
     input: [ {HADM_ID: [code1, code2, ... ,coden]}, ... ]
     output: [ [HADM_ID1, HADM_ID2, distance], ...]
     '''
-
     # matrix = [patient1, patient2, distance]
     print(patients)
     matrix = []
@@ -82,5 +81,6 @@ if __name__ == "__main__":
     patient3 = {16: ['99662', '99591', '5990', '4019']}
 
     patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    make_distance_matrix([patient3, patient4])
+    patient5 = {18: ['4329', '43491', '99702', '99591', '5990', '4019']}
+    make_distance_matrix([patient3, patient4, patient5])
     read_csv('icd_diagnostic_categories.csv')
