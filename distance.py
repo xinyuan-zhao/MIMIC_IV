@@ -1,3 +1,4 @@
+import itertools
 import math
 import csv
 
@@ -9,6 +10,7 @@ def read_csv(file):
     # file = 'file.csv'
     # Open the CSV file
 
+    row_list = []
     with open(file, 'r') as file:
 
         # Create a reader object
@@ -19,13 +21,24 @@ def read_csv(file):
         # Loop through each row in the CSV file
         for row in csv_reader:
             # Print each row
-            print(row)
-            # Increment the row count
+            if row_count > 0:
+                get_data = [row[1],row[4]]
+                row_list.append(get_data)
+                # Increment the row count
             row_count += 1
 
             # Exit the loop once you've printed the first 10 rows
-            if row_count == 10:
+            if row_count == 100:
                 break
+        return row_list
+
+def get_dict(the_list):
+    output_list = []
+
+    for key, group in itertools.groupby(the_list, key=lambda x: x[0]):
+        output_dict = {key: [value for _, value in group]}
+        output_list.append(output_dict)
+    return output_list
 
 def distance(patient1, patient2):
     '''
@@ -52,8 +65,10 @@ def make_distance_matrix(patients):
     output: [ [HADM_ID1, HADM_ID2, distance], ...]
     '''
     # matrix = [patient1, patient2, distance]
-    print(patients)
     matrix = []
+    print(111)
+    print(patients)
+    num = 0
     for patient1 in patients:
         for patient2 in patients:
             # print(list(patient1.keys())[0], list(patient2.keys())[0])
@@ -61,7 +76,9 @@ def make_distance_matrix(patients):
             d = distance(list(patient1.values())[0], list(patient2.values())[0])
             # TODO: add this to the matrix
             matrix.append([list(patient1.keys())[0], list(patient2.keys())[0], d])
+            num += 1
     print(matrix)
+    print(num)
 
 
 def make_list_of_possible_edges():
@@ -73,14 +90,18 @@ def make_list_of_possible_edges():
 
 if __name__ == "__main__":
     # Example from Alcaide et. al. Similarity should be 0.56.
-    patient1 = ['99662', '99591', '5990', '4019']
-    patient2 = ['4329', '43491', '99702', '99591', '5990', '4019']
 
-    print( round(distance(patient1, patient2), 2) )
+    the_data = read_csv('icd_diagnostic_categories.csv')
+    print(the_data)
+    patient_list = get_dict(the_data)
+    print(patient_list)
+    # patient1 = ['99662', '99591', '5990', '4019']
+    # patient2 = ['4329', '43491', '99702', '99591', '5990', '4019']
+    #
+    # print( round(distance(patient1, patient2), 2) )
 
-    patient3 = {16: ['99662', '99591', '5990', '4019']}
-
-    patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    patient5 = {18: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    make_distance_matrix([patient3, patient4, patient5])
-    read_csv('icd_diagnostic_categories.csv')
+    # patient3 = {16: ['99662', '99591', '5990', '4019']}
+    #
+    # patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
+    # patient5 = {18: ['4329', '43491', '99702', '99591', '5990', '4019']}
+    make_distance_matrix(patient_list)
