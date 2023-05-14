@@ -34,7 +34,6 @@ def read_csv(file):
 
 def get_dict(the_list):
     output_list = []
-
     for key, group in itertools.groupby(the_list, key=lambda x: x[0]):
         output_dict = {key: [value for _, value in group]}
         output_list.append(output_dict)
@@ -77,14 +76,15 @@ def make_distance_matrix(patients):
             # TODO: add this to the matrix
             matrix.append([list(patient1.keys())[0], list(patient2.keys())[0], d])
             num += 1
-    print(matrix)
-    print(num)
+    # print(matrix)
+    # print(num)
+    return matrix
 
-
-def make_list_of_possible_edges():
+def make_list_of_possible_edges(the_list):
     # Sorting the list by distance
-
-    return None
+    output_list = sorted(the_list, key=lambda x: x[2] if len(x) >= 3 else 0)
+    print(output_list)
+    return output_list
 
 
 
@@ -97,11 +97,12 @@ if __name__ == "__main__":
     print(patient_list)
     # patient1 = ['99662', '99591', '5990', '4019']
     # patient2 = ['4329', '43491', '99702', '99591', '5990', '4019']
-    #
+
     # print( round(distance(patient1, patient2), 2) )
 
     # patient3 = {16: ['99662', '99591', '5990', '4019']}
-    #
+
     # patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
     # patient5 = {18: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    make_distance_matrix(patient_list)
+    distance_list = make_distance_matrix(patient_list)
+    make_list_of_possible_edges(distance_list)
