@@ -39,7 +39,7 @@ def get_dict(the_list):
         output_list.append(output_dict)
     return output_list
 
-def distance(patient1, patient2):
+def similarity(patient1, patient2):
     '''
     Calculate the similarity between the diagnosis codes of two patient encounters. 
     Weights contribution of ICD code similarity by line order.
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     # patient1 = ['99662', '99591', '5990', '4019']
     # patient2 = ['4329', '43491', '99702', '99591', '5990', '4019']
 
-    # print( round(distance(patient1, patient2), 2) )
+    # print( round(similarity(patient1, patient2), 2) )
 
     # patient3 = {16: ['99662', '99591', '5990', '4019']}
 
