@@ -1,43 +1,5 @@
-import itertools
 import math
-import csv
-
-def read_csv(file):
-    # need 'hadm_id', 'sequence_number'，'icd_diagnostic_category'
-    # ['subject_id', 'hadm_id', 'sequence_number', 'level', 'icd_diagnostic_category']
-
-    # ['2', '163353', '1', '2', 'V30']
-    # file = 'file.csv'
-    # Open the CSV file
-
-    row_list = []
-    with open(file, 'r') as file:
-
-        # Create a reader object
-        csv_reader = csv.reader(file)
-        # Counter variable to keep track of number of rows printed
-        row_count = 0
-
-        # Loop through each row in the CSV file
-        for row in csv_reader:
-            # Print each row
-            if row_count > 0:
-                get_data = [row[1],row[4]]
-                row_list.append(get_data)
-                # Increment the row count
-            row_count += 1
-
-            # Exit the loop once you've printed the first 10 rows
-            if row_count == 100:
-                break
-        return row_list
-
-def get_dict(the_list):
-    output_list = []
-    for key, group in itertools.groupby(the_list, key=lambda x: x[0]):
-        output_dict = {key: [value for _, value in group]}
-        output_list.append(output_dict)
-    return output_list
+import pandas as pd
 
 def similarity(patient1, patient2):
     '''
@@ -47,7 +9,7 @@ def similarity(patient1, patient2):
     See Alcaide et. al.
     '''
     similarity = 0
-    
+
     for ix1, dx1 in enumerate(patient1):
         if dx1 not in patient2:
             continue
@@ -57,52 +19,50 @@ def similarity(patient1, patient2):
 
     return similarity
 
-def make_distance_matrix(patients):
+def make_list_of_possible_edges(data, condition):
     '''
-    codes in order by SEQ_NUM
-    input: [ {HADM_ID: [code1, code2, ... ,coden]}, ... ]
-    output: [ [HADM_ID1, HADM_ID2, distance], ...]
+    input data is DIAGNOSES_ICD.csv from MIMIC-III
     '''
-    # matrix = [patient1, patient2, distance]
-    matrix = []
-    print(111)
-    print(patients)
-    num = 0
-    for patient1 in patients:
-        for patient2 in patients:
-            # print(list(patient1.keys())[0], list(patient2.keys())[0])
-            # print(list(patient1.values())[0], list(patient2.values())[0])
-            d = distance(list(patient1.values())[0], list(patient2.values())[0])
-            # TODO: add this to the matrix
-            matrix.append([list(patient1.keys())[0], list(patient2.keys())[0], d])
-            num += 1
-    # print(matrix)
-    # print(num)
-    return matrix
+    
+    from tqdm import tqdm # pip3 install tqdm
 
-def make_list_of_possible_edges(the_list):
-    # Sorting the list by distance
-    output_list = sorted(the_list, key=lambda x: x[2] if len(x) >= 3 else 0)
-    print(output_list)
-    return output_list
+    # filter to patients with condition of interest
+    data.HADM_ID = data.HADM_ID.astype(str)
+    hadm_list = list(data[data.ICD9_CODE == condition]['HADM_ID'])
+    data = data[data.HADM_ID.isin(hadm_list)]
 
+    # create a dictionary of patients and their diagnoses
+    codes = { hadm: list(data[data.HADM_ID == hadm].sort_values(by='SEQ_NUM')['ICD9_CODE'])
+              for hadm 
+              in data.HADM_ID.unique() }
 
+    # list of possible edges is similarity of all unique pairs of patients
+    possible_edges = []
+    for i,hadm1 in tqdm(enumerate(hadm_list), total=len(hadm_list)):
+        for j,hadm2 in enumerate(hadm_list):
+            if i < j: # only need to calculate similarity once for each pair
+                possible_edges.append( [hadm1, hadm2, similarity(codes[hadm1], codes[hadm2])] )
+
+    return pd.DataFrame(possible_edges, columns=['hadm1', 'hadm2', 'similarity'])
 
 if __name__ == "__main__":
-    # Example from Alcaide et. al. Similarity should be 0.56.
+    # test functions using example from Alcaide et. al. 
+    # Patient A: '115057'
+    # Patient B: '117154'
+    # similarity: 0.56
 
-    the_data = read_csv('icd_diagnostic_categories.csv')
-    print(the_data)
-    patient_list = get_dict(the_data)
-    print(patient_list)
-    # patient1 = ['99662', '99591', '5990', '4019']
-    # patient2 = ['4329', '43491', '99702', '99591', '5990', '4019']
+    # test similarity function
+    patientA = ['99662', '99591', '5990', '4019']
+    patientB = ['4329', '43491', '99702', '99591', '5990', '4019']
+    test1 = round(similarity(patientA, patientB), 2)
 
-    # print( round(similarity(patient1, patient2), 2) )
-
-    # patient3 = {16: ['99662', '99591', '5990', '4019']}
-
-    # patient4 = {17: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    # patient5 = {18: ['4329', '43491', '99702', '99591', '5990', '4019']}
-    distance_list = make_distance_matrix(patient_list)
-    make_list_of_possible_edges(distance_list)
+    # test make_list_of_possible_edges function
+    df = pd.read_csv('./DIAGNOSES_ICD.csv')
+    possible_edges = make_list_of_possible_edges(df, condition='99591') # 99591 is sepsis
+    
+    test2 = round(possible_edges[(possible_edges.hadm1 == '115057') & (possible_edges.hadm2 == '117154') |
+                                 (possible_edges.hadm1 == '117154') & (possible_edges.hadm2 == '115057')].
+                  similarity.values[0], 2)
+    
+    print(f'Test 1: {test1} | passed: {test1==0.56}' )
+    print(f'Test 2: {test2} | passed: {test2==0.56}' )
