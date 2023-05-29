@@ -18,6 +18,23 @@ def similarity(patient1, patient2):
         similarity += math.log( 1 + 1/max(ix1+1, ix2+1) )
 
     return similarity
+def convert_similarity_to_distance(possible_edges):
+    '''
+    The similarity measure S needs to be converted into a distance measure D = 1 − Snormalized where Snormalized = S/max(S).
+    :return: distance
+    '''
+    # DataFrame named 'possible_edges' with columns 'hadm1', 'hadm2', 'similarity'
+
+    # Calculate Snormalized
+
+    print(possible_edges['similarity'].max())
+    possible_edges['s_normalized'] = possible_edges['similarity'] / possible_edges['similarity'].max()
+
+    possible_edges['distance'] = 1 - possible_edges['s_normalized']
+
+    result = possible_edges[['hadm1', 'hadm2', 'distance']]
+    return result
+
 
 def make_list_of_possible_edges(data, condition):
     '''
@@ -59,10 +76,10 @@ if __name__ == "__main__":
     # test make_list_of_possible_edges function
     df = pd.read_csv('./DIAGNOSES_ICD.csv')
     possible_edges = make_list_of_possible_edges(df, condition='99591') # 99591 is sepsis
-    
+    # print(possible_edges)
     test2 = round(possible_edges[(possible_edges.hadm1 == '115057') & (possible_edges.hadm2 == '117154') |
                                  (possible_edges.hadm1 == '117154') & (possible_edges.hadm2 == '115057')].
                   similarity.values[0], 2)
-    
+    print(convert_similarity_to_distance(possible_edges))
     print(f'Test 1: {test1} | passed: {test1==0.56}' )
     print(f'Test 2: {test2} | passed: {test2==0.56}' )
