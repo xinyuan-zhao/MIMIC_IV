@@ -62,6 +62,38 @@ def make_list_of_possible_edges(data, condition):
 
     return pd.DataFrame(possible_edges, columns=['hadm1', 'hadm2', 'similarity'])
 
+def find_parent(node, parent):
+    if parent[node] != node:
+        parent[node] = find_parent(parent[node], parent)
+    return parent[node]
+
+def union(u, v, parent):
+    parent[find_parent(v, parent)] = find_parent(u, parent)
+
+def create_minimum_spanning_tree(possible_edges_distance):
+    # Drop rows with missing or inconsistent values
+    possible_edges_distance = possible_edges_distance.dropna()
+    possible_edges_distance = possible_edges_distance.astype(int)
+
+    sorted_edges = possible_edges_distance.sort_values(by='distance')
+    parent = {}
+    unique_nodes = set(possible_edges_distance['hadm1'].unique()) | set(possible_edges_distance['hadm2'].unique())
+
+    for node in unique_nodes:
+        parent[node] = node
+
+    minimum_spanning_tree = []
+
+    for _, row in sorted_edges.iterrows():
+        u, v, distance = row['hadm1'], row['hadm2'], row['distance']
+        if u in parent and v in parent and find_parent(u, parent) != find_parent(v, parent):
+            minimum_spanning_tree.append((u, v, distance))
+            union(u, v, parent)
+
+    return minimum_spanning_tree
+
+
+
 if __name__ == "__main__":
     # test functions using example from Alcaide et. al. 
     # Patient A: '115057'
@@ -80,6 +112,15 @@ if __name__ == "__main__":
     test2 = round(possible_edges[(possible_edges.hadm1 == '115057') & (possible_edges.hadm2 == '117154') |
                                  (possible_edges.hadm1 == '117154') & (possible_edges.hadm2 == '115057')].
                   similarity.values[0], 2)
+
+    possible_edges_distance = convert_similarity_to_distance(possible_edges)
     print(convert_similarity_to_distance(possible_edges))
+
+    # create minimum spanning tree
+    minimum_spanning_tree = create_minimum_spanning_tree(possible_edges_distance)
+    for edge in minimum_spanning_tree:
+        print(edge)
+
+
     print(f'Test 1: {test1} | passed: {test1==0.56}' )
     print(f'Test 2: {test2} | passed: {test2==0.56}' )
